@@ -28,25 +28,25 @@ import frc.robot.Constants;
 public class AprilTagVision {
 
     AprilTagFieldLayout aprilTagFieldLayout;
-    PhotonCamera aprilTagCamera;
+    PhotonCamera aprilTagsCamera;
     static PhotonPoseEstimator photonPoseEstimator;
 
     public AprilTagVision(){
         aprilTagFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         
         //Forward Camera
-        aprilTagCamera = new PhotonCamera("AprilTagCamera");
+        aprilTagsCamera = new PhotonCamera("AprilTagCamera");
         Transform3d robotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0,0,0)); //Cam mounted facing forward, half a meter forward of center, half a meter up from center.
 
         // Construct PhotonPoseEstimator
-        PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, aprilTagCamera, robotToCam);
+        PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(aprilTagFieldLayout, PoseStrategy.CLOSEST_TO_REFERENCE_POSE, aprilTagsCamera, robotToCam);
         photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
 
     }
 
 
     public PhotonPipelineResult getLatestResult() {
-        return aprilTagCamera.getLatestResult();
+        return aprilTagsCamera.getLatestResult();
     }
 
 
@@ -87,13 +87,44 @@ public class AprilTagVision {
     }
 
 
+    private int getSpesificAprilTag(int aprilTag_ID) {
+        var result = aprilTagsCamera.getLatestResult();
+        if (result.hasTargets()) {
+            var targets = result.getTargets();
 
+            for (int i = 0; i < targets.size();) {
+                if (targets.get(i).getFiducialId() == aprilTag_ID) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
 
+    public double distenceFromSpesificAprilTag(int aprilTag_ID) {
+        var result = aprilTagsCamera.getLatestResult();
+        if (result.hasTargets()) {
+            var targets = result.getTargets();
+            return targets.get(getSpesificAprilTag(aprilTag_ID)).getBestCameraToTarget().getX();
+        } else {
+            return -1;
+        }
+    }
 
+    public double engelFromSpesificAprilTag(int aprilTag_ID) {
+        var result = aprilTagsCamera.getLatestResult();
+        if (result.hasTargets()) {
+            var targets = result.getTargets();
+            return targets.get(getSpesificAprilTag(aprilTag_ID)).getBestCameraToTarget().getRotation().getX();
+        } else {
+            return 0;
+        }
+    }
 
-
-
-
+    public boolean seeAprilTags() {
+        var result = aprilTagsCamera.getLatestResult();
+        return result.hasTargets();
+    }
 
 
 }

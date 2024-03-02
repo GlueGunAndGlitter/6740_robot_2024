@@ -21,7 +21,6 @@ import frc.robot.subsystems.Swerve;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AmpAssist extends PIDCommand {
   /** Creates a new Test. */
-  Optional<DriverStation.Alliance> dd;
 
   public AmpAssist(Swerve swerve, DoubleSupplier translationX, DoubleSupplier translationY,
       DoubleSupplier rotationSup) {
@@ -29,7 +28,7 @@ public class AmpAssist extends PIDCommand {
         // The controller that the command will use
         new PIDController(0.008, 0, 0.0008),
         // This should return the measurement
-        () -> RobotContainer.aprilTags_Vision.engelFromSpesificAprilTag(wantedAprilTags()),
+        () -> RobotContainer.aprilTag_Vision.engelFromSpesificAprilTag(wantedAprilTags()),
         // This should return the setpoint (can also be a constant)
         () -> 0,
         // This uses the output
@@ -39,7 +38,7 @@ public class AmpAssist extends PIDCommand {
           double rotationVal = -MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
 
           /* Drive */
-          if (RobotContainer.aprilTags_Vision.seeAprilTags()) {
+          if (RobotContainer.aprilTag_Vision.seeAprilTags()){
             swerve.drive(
                 new Translation2d(translationVal, output).times(Constants.Swerve.maxSpeed),
                 rotationVal * Constants.Swerve.maxAngularVelocity,

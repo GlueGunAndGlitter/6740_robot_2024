@@ -20,9 +20,12 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.Vision.AprilTagVision;
 import frc.robot.Vision.AprilTagsVision;
 import frc.robot.Vision.NoteVision;
 import frc.robot.automations.AimAssist;
+import frc.robot.automations.AmpAssist;
+import frc.robot.automations.RotateToAmp;
 import frc.robot.commands.driveCommands.TeleopSwerve;
 import frc.robot.subsystems.*;
 
@@ -65,7 +68,7 @@ public class RobotContainer {
 	public static final TransportationSubsystem transportation = new TransportationSubsystem();
 	public static final ClimbSubsystem climb = new ClimbSubsystem();
 	public static final NoteVision note_vision = new NoteVision();
-	public static final AprilTagsVision aprilTags_Vision = new AprilTagsVision();
+	public static final AprilTagVision aprilTag_Vision = new AprilTagVision();
 
 	private final SendableChooser<Command> autoChooser;
 
@@ -104,12 +107,24 @@ public class RobotContainer {
 				shooter.shootUpCommand()
 						.alongWith(waitAndLoadCommand())
 						.deadlineWith(teleopSwerve(true)));
+						
 
 		commandXBoxController.leftBumper().whileTrue(
 				shooter.shooterDownCommand()
 						.alongWith(waitAndLoadCommand())
-						.deadlineWith(teleopSwerve(true)));
+						.alongWith(new AimAssist(
+				swerve,
+				() -> -driver.getRawAxis(translationAxis),
+				() -> -driver.getRawAxis(strafeAxis),
+				() -> -driver.getRawAxis(rotationAxis))
+				)
+				.alongWith(new RotateToAmp(swerve,
+				() -> -driver.getRawAxis(translationAxis),
+				() -> -driver.getRawAxis(strafeAxis),
+				() -> -driver.getRawAxis(rotationAxis)))					
+				.deadlineWith(teleopSwerve(true)));		
 
+				
 		// Transportation Triggers
 		commandXBoxController.a().toggleOnTrue(
 				transportation.transportUpCommand());
