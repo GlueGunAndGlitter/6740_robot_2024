@@ -2,31 +2,34 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.automations.driveAutomizations;
+package frc.robot.automations;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Swerve;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class AimAssist extends PIDCommand {
+public class AmpAssist extends PIDCommand {
   /** Creates a new Test. */
-  public AimAssist(Swerve swerve, DoubleSupplier translationX, DoubleSupplier translationY,
+  Optional<DriverStation.Alliance> dd;
+
+  public AmpAssist(Swerve swerve, DoubleSupplier translationX, DoubleSupplier translationY,
       DoubleSupplier rotationSup) {
     super(
         // The controller that the command will use
         new PIDController(0.008, 0, 0.0008),
         // This should return the measurement
-        () -> Robot.getRobotToNoteYaw(),
+        () -> RobotContainer.aprilTags_Vision.engelFromSpesificAprilTag(wantedAprilTags()),
         // This should return the setpoint (can also be a constant)
         () -> 0,
         // This uses the output
@@ -36,20 +39,12 @@ public class AimAssist extends PIDCommand {
           double rotationVal = -MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
 
           /* Drive */
-          if (Robot.seesNote()) {
-            if (RobotContainer.xboxController.getYButton()) {
-              swerve.drive(
-                  new Translation2d(0.6, -strafeVal).times(Constants.Swerve.maxSpeed),
-                  -output * Constants.Swerve.maxAngularVelocity,
-                  false,
-                  true);
-            } else {
-              swerve.drive(
-                  new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
-                  -output * Constants.Swerve.maxAngularVelocity,
-                  true,
-                  true);
-            }
+          if (RobotContainer.aprilTags_Vision.seeAprilTags()) {
+            swerve.drive(
+                new Translation2d(translationVal, output).times(Constants.Swerve.maxSpeed),
+                rotationVal * Constants.Swerve.maxAngularVelocity,
+                false,
+                true);
           } else {
             swerve.drive(
                 new Translation2d(translationVal, strafeVal).times(Constants.Swerve.maxSpeed),
@@ -61,6 +56,14 @@ public class AimAssist extends PIDCommand {
         },
         swerve);
   };
+
+  private static int wantedAprilTags() {
+    if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      return 5;
+    } else {
+      return 6;
+    }
+  }
   // Use addRequirements() here to declare subsystem dependencies.
   // Configure additional PID options by calling `getController` here.
 

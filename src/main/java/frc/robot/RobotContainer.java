@@ -6,6 +6,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -19,8 +20,9 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.Vision.AprilTagsVision;
 import frc.robot.Vision.NoteVision;
-import frc.robot.automations.driveAutomizations.AimAssist;
+import frc.robot.automations.AimAssist;
 import frc.robot.commands.driveCommands.TeleopSwerve;
 import frc.robot.subsystems.*;
 
@@ -63,6 +65,7 @@ public class RobotContainer {
 	public static final TransportationSubsystem transportation = new TransportationSubsystem();
 	public static final ClimbSubsystem climb = new ClimbSubsystem();
 	public static final NoteVision note_vision = new NoteVision();
+	public static final AprilTagsVision aprilTags_Vision = new AprilTagsVision();
 
 	private final SendableChooser<Command> autoChooser;
 

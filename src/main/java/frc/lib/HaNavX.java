@@ -11,7 +11,6 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.Robot;
 
 /**
  * A wrapper class for kauailabs.navx.frc.AHRS, which adheres to WPILib's
