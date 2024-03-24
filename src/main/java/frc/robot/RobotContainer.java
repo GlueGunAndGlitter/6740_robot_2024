@@ -58,7 +58,7 @@ public class RobotContainer {
 	// private final JoystickButton IntakeEnableCommand = new JoystickButton(driver,
 	// XboxController.Button.kRightBumper.value);
 	/* Subsystems */
-	public final Swerve swerve = new Swerve();
+	public final static Swerve swerve = new Swerve();
 	public static final ShooterSubsystem shooter = new ShooterSubsystem();
 	public static final TransportationSubsystem transportation = new TransportationSubsystem();
 	public static final ClimbSubsystem climb = new ClimbSubsystem();

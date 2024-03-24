@@ -4,12 +4,7 @@
 
 package frc.robot.autos;
 
-import org.ejml.dense.row.misc.TransposeAlgs_DDRM;
-
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransportationSubsystem;
 

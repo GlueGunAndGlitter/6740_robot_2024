@@ -33,6 +33,9 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.Constants.Vision;
+import frc.robot.Vision.AprilTagVision;
+import frc.robot.Vision.NoteVision;
 import frc.robot.subsystems.Swerve;
 
 /**
@@ -51,6 +54,8 @@ public class Robot extends TimedRobot {
   private Command autonomousCommand;
 
   private RobotContainer robotContainer;
+
+  private AprilTagVision vision;
 
   public static GenericEntry intakeHigherMotorSpeed;
   public static GenericEntry intakeLowerMotorSpeed;
@@ -81,6 +86,7 @@ public class Robot extends TimedRobot {
     smartDashboard();
     robotContainer = new RobotContainer();
     warmupCommand().schedule();
+    vision = new AprilTagVision();
   }
 
   /**
@@ -103,7 +109,16 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods. This must be called from the
     // robot's periodic
     // block in order for anything in the Command-based framework to work.
+    var visionEst = AprilTagVision.getEstimatedGlobalPose();
+    visionEst.ifPresent(
+            est -> {
+                var estPose = est.estimatedPose.toPose2d();
+                // Change our trust in the measurement based on the tags we can see
+                var estStdDevs = vision.getEstimationStdDevs(estPose);
 
+                RobotContainer.swerve.addVisionMeasurement(
+                        est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+            });
     CommandScheduler.getInstance().run();
   }
 

@@ -39,7 +39,7 @@ public class SwerveModule {
 
     public SwerveModule(
             int moduleNumber, SwerveModuleConstants moduleConstants,
-            boolean angleInverted, boolean driveiInverted) {
+            boolean angleInverted, boolean driveInverted) {
         this.moduleNumber = moduleNumber;
         this.angleOffset = moduleConstants.angleOffset;
 
@@ -58,7 +58,7 @@ public class SwerveModule {
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID);
         mDriveMotor.getConfigurator().apply(Robot.ctreConfigs.swerveDriveFXConfig);
         mDriveMotor.getConfigurator().setPosition(0.0);
-        if (driveiInverted)
+        if (driveInverted)
             invertMotor(mDriveMotor);
     }
 

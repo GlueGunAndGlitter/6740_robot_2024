@@ -15,21 +15,45 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
-
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
-    public SwerveDriveOdometry swerveOdometry;
     public SwerveModule[] mSwerveMods;
+    private final SwerveDrivePoseEstimator poseEstimator;
+
     private final HaNavX gyro;
 
+
     public Swerve() {
+
+        // Define the standard deviations for the pose estimator, which determine how fast the pose
+        // estimate converges to the vision measurement. This should depend on the vision measurement
+        // noise
+        // and how many or how frequently vision measurements are applied to the pose estimator.
+        var stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+        var visionStdDevs = VecBuilder.fill(1, 1, 1);
+        poseEstimator =
+                new SwerveDrivePoseEstimator(
+                        Constants.Swerve.swerveKinematics,
+                        getGyroYaw(),
+                        getModulePositions(),
+                        new Pose2d(),
+                        stateStdDevs,
+                        visionStdDevs);
+
+
+
         AutoBuilder.configureHolonomic(
                 this::getPose,
                 this::resetOdometry,
@@ -60,7 +84,7 @@ public class Swerve extends SubsystemBase {
                 new SwerveModule(3, Constants.Swerve.Mod3.constants, false, true),
         };
 
-        swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
+        // swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -113,7 +137,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public Optional<Rotation2d> getRotationTargetOverride() {
@@ -126,8 +150,12 @@ public class Swerve extends SubsystemBase {
 
     public void resetOdometry(Pose2d pose) {
         setHeading(pose.getRotation().unaryMinus());
-        swerveOdometry.resetPosition(getGyroYaw(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose);
+
     }
+
+
+
 
     public Rotation2d getHeading() {
         return Rotation2d.fromDegrees(gyro.getYawAngleDeg());
@@ -170,14 +198,26 @@ public class Swerve extends SubsystemBase {
         return Constants.Swerve.swerveKinematics.toChassisSpeeds(getModuleStates());
     }
 
+    public void addVisionMeasurement(Pose2d visionMeasurement, double timestampSeconds) {
+        poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds);
+    }
+
+    public void addVisionMeasurement(
+        Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+        poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
+    }
+
     @Override
     public void periodic() {
-        swerveOdometry.update(getGyroYaw(), getModulePositions());
+        // Update the odometry of the swerve drive using the wheel encoders and gyro.
+        poseEstimator.update(getGyroYaw(), getModulePositions());
 
         for (SwerveModule mod : mSwerveMods) {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " CANcoder", mod.getCANcoder().getDegrees());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.getDegrees());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
+
+
     }
 }
