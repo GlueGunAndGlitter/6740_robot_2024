@@ -1,12 +1,9 @@
 package frc.robot;
 
-import java.util.function.Supplier;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -21,11 +18,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Vision.AprilTagVision;
-import frc.robot.Vision.AprilTagsVision;
 import frc.robot.Vision.NoteVision;
 import frc.robot.automations.AimAssist;
-import frc.robot.automations.AmpAssist;
+import frc.robot.automations.DriveToStage;
 import frc.robot.automations.RotateToAmp;
+import frc.robot.automations.RotateToStage;
 import frc.robot.commands.driveCommands.TeleopSwerve;
 import frc.robot.subsystems.*;
 
@@ -63,6 +60,8 @@ public class RobotContainer {
 	// private final JoystickButton IntakeEnableCommand = new JoystickButton(driver,
 	// XboxController.Button.kRightBumper.value);
 	/* Subsystems */
+
+	/* Defining all of the subsystems and additional systems. */
 	public final static Swerve swerve = new Swerve();
 	public static final ShooterSubsystem shooter = new ShooterSubsystem();
 	public static final TransportationSubsystem transportation = new TransportationSubsystem();
@@ -73,8 +72,6 @@ public class RobotContainer {
 	private final SendableChooser<Command> autoChooser;
 
 	/**
-	 * q+
-	 * `
 	 * The container
 	 * for the robot. Contains subsystems, OI devices, and commands.
 	 */
@@ -103,35 +100,51 @@ public class RobotContainer {
 		zeroGyro.onTrue(new InstantCommand(() -> swerve.zeroHeading()));
 
 		// Shooter Triggers
+
+		// Speaker Shot
 		commandXBoxController.rightBumper().whileTrue(
 				shooter.shootUpCommand()
 						.alongWith(waitAndLoadCommand())
 						.deadlineWith(teleopSwerve(true)));
-						
 
+		// Amp Shot
 		commandXBoxController.leftBumper().whileTrue(
 				shooter.shooterDownCommand()
 						.alongWith(waitAndLoadCommand())
 						.alongWith(new AimAssist(
-				swerve,
-				() -> -driver.getRawAxis(translationAxis),
-				() -> -driver.getRawAxis(strafeAxis),
-				() -> -driver.getRawAxis(rotationAxis))
-				)
-				.alongWith(new RotateToAmp(swerve,
-				() -> -driver.getRawAxis(translationAxis),
-				() -> -driver.getRawAxis(strafeAxis),
-				() -> -driver.getRawAxis(rotationAxis)))					
-				.deadlineWith(teleopSwerve(true)));		
+								swerve,
+								() -> -driver.getRawAxis(translationAxis),
+								() -> -driver.getRawAxis(strafeAxis),
+								() -> -driver.getRawAxis(rotationAxis)))
+						.alongWith(new RotateToAmp(swerve,
+								() -> -driver.getRawAxis(translationAxis),
+								() -> -driver.getRawAxis(strafeAxis),
+								() -> -driver.getRawAxis(rotationAxis))));
 
-				
 		// Transportation Triggers
 		commandXBoxController.a().toggleOnTrue(
 				transportation.transportUpCommand());
 		commandXBoxController.x().toggleOnTrue(transportation.transportDownCommand());
 
 		// Climb Triggers
-		// commandXBoxController.rightTrigger().whileTrue(climbSubsystem.setSpeedCommand());
+		commandXBoxController.rightTrigger().whileTrue(new RotateToStage(
+				swerve,
+				() -> -driver.getRawAxis(translationAxis),
+				() -> -driver.getRawAxis(strafeAxis),
+				() -> -driver.getRawAxis(rotationAxis),
+				aprilTag_Vision)
+				.withTimeout(0.5)
+				.andThen(new DriveToStage(swerve,
+						() -> -driver.getRawAxis(translationAxis),
+						() -> -driver.getRawAxis(strafeAxis),
+						() -> -driver.getRawAxis(rotationAxis),
+						aprilTag_Vision))
+				.withTimeout(3)
+				.andThen(swerve.driveToSideCommand(swerve,
+						() -> -driver.getRawAxis(translationAxis),
+						() -> -driver.getRawAxis(rotationAxis)))
+				.withTimeout(2)
+				.andThen(climb.setSpeeCommand()));
 
 		// Aim Assist Triggers
 		commandXBoxController.leftTrigger().whileTrue(new AimAssist(
@@ -144,6 +157,10 @@ public class RobotContainer {
 		// Test Triggers
 	}
 
+	/**
+	 * Setting all of the commands that will run constantly when not scheduled.
+	 */
+
 	private void setDefaultCommands() {
 		swerve.setDefaultCommand(teleopSwerve(false));
 
@@ -155,6 +172,13 @@ public class RobotContainer {
 
 	}
 
+	/**
+	 * An additional command in order to replace the current swerve with a swerve
+	 * with the ability to cross wheels.
+	 * 
+	 * @param crossWhileNotMoving true if to cross, false if not
+	 * @return command
+	 */
 	private Command teleopSwerve(boolean crossWhileNotMoving) {
 		return new TeleopSwerve(
 				swerve,
@@ -165,12 +189,23 @@ public class RobotContainer {
 				crossWhileNotMoving);
 	}
 
+	/**
+	 * A command that waits 0.1 seconds, checks if the joysticks are moving, if they
+	 * aren't it will wait 0.5 seconds and activate the transportation
+	 * 
+	 * @return Command
+	 */
+
 	private Command waitAndLoadCommand() {
 		return new WaitCommand(0.1)
 				.andThen(new WaitUntilCommand(() -> !areJoysticksMoving()))
 				.andThen(new WaitCommand(0.5))
 				.andThen(transportation.transportUpCommand());
 	}
+
+	/**
+	 * Registers all commands inside it into the NamedCommands object
+	 */
 
 	public void registerCommand() {
 		NamedCommands.registerCommand("ShooterUpDown",

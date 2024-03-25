@@ -8,13 +8,14 @@ import frc.robot.RobotContainer;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -34,25 +35,24 @@ public class Swerve extends SubsystemBase {
 
     private final HaNavX gyro;
 
-
     public Swerve() {
 
-        // Define the standard deviations for the pose estimator, which determine how fast the pose
-        // estimate converges to the vision measurement. This should depend on the vision measurement
+        // Define the standard deviations for the pose estimator, which determine how
+        // fast the pose
+        // estimate converges to the vision measurement. This should depend on the
+        // vision measurement
         // noise
-        // and how many or how frequently vision measurements are applied to the pose estimator.
+        // and how many or how frequently vision measurements are applied to the pose
+        // estimator.
         var stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
         var visionStdDevs = VecBuilder.fill(1, 1, 1);
-        poseEstimator =
-                new SwerveDrivePoseEstimator(
-                        Constants.Swerve.swerveKinematics,
-                        getGyroYaw(),
-                        getModulePositions(),
-                        new Pose2d(),
-                        stateStdDevs,
-                        visionStdDevs);
-
-
+        poseEstimator = new SwerveDrivePoseEstimator(
+                Constants.Swerve.swerveKinematics,
+                getGyroYaw(),
+                getModulePositions(),
+                new Pose2d(),
+                stateStdDevs,
+                visionStdDevs);
 
         AutoBuilder.configureHolonomic(
                 this::getPose,
@@ -84,7 +84,8 @@ public class Swerve extends SubsystemBase {
                 new SwerveModule(3, Constants.Swerve.Mod3.constants, false, true),
         };
 
-        // swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getGyroYaw(), getModulePositions());
+        // swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics,
+        // getGyroYaw(), getModulePositions());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -103,6 +104,19 @@ public class Swerve extends SubsystemBase {
         for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
+    }
+
+    public Command driveToSideCommand(Swerve swerve, DoubleSupplier translationX,
+            DoubleSupplier rotationSup) {
+        double translationVal = MathUtil.applyDeadband(translationX.getAsDouble(), Constants.stickDeadband);
+        double rotationVal = -MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
+
+        return this.run(() -> swerve.drive(
+                new Translation2d(translationVal, 0.5).times(Constants.Swerve.maxSpeed),
+                rotationVal * Constants.Swerve.maxAngularVelocity,
+                false,
+                true));
+
     }
 
     public void driveRobotRelative(ChassisSpeeds speeds) {
@@ -142,7 +156,8 @@ public class Swerve extends SubsystemBase {
 
     public Optional<Rotation2d> getRotationTargetOverride() {
         if (RobotContainer.note_vision.seesNote()) {
-            return Optional.of(Rotation2d.fromDegrees(RobotContainer.note_vision.getRobotToNoteYaw() + getHeading().getDegrees()));
+            return Optional.of(
+                    Rotation2d.fromDegrees(RobotContainer.note_vision.getRobotToNoteYaw() + getHeading().getDegrees()));
         } else {
             return Optional.empty();
         }
@@ -153,9 +168,6 @@ public class Swerve extends SubsystemBase {
         poseEstimator.resetPosition(getGyroYaw(), getModulePositions(), pose);
 
     }
-
-
-
 
     public Rotation2d getHeading() {
         return Rotation2d.fromDegrees(gyro.getYawAngleDeg());
@@ -180,14 +192,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void crossWheels() {
-        SwerveModuleState[] crossStates = {
-                new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(135)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(115)),
-                new SwerveModuleState(0, Rotation2d.fromDegrees(225))
-        };
-
-        setModuleStates(crossStates);
+        setModuleStates(Constants.Swerve.crossStates);
     }
 
     public Command crossWheelsCommand() {
@@ -203,7 +208,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void addVisionMeasurement(
-        Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
+            Pose2d visionMeasurement, double timestampSeconds, Matrix<N3, N1> stdDevs) {
         poseEstimator.addVisionMeasurement(visionMeasurement, timestampSeconds, stdDevs);
     }
 
@@ -217,7 +222,6 @@ public class Swerve extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Angle", mod.getPosition().angle.getDegrees());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
         }
-
 
     }
 }

@@ -22,9 +22,17 @@ public class ClimbSubsystem extends SubsystemBase {
   public ClimbSubsystem() {
   }
 
+  public void setSpeed(double speed) {
+    climbLeftMotor.set(speed);
+    climbRightMotor.set(speed);
+  }
+
+  public Command setSpeeCommand() {
+    return this.run(() -> setSpeed(RobotContainer.xboxController.getRightTriggerAxis()));
+  }
+
   @Override
   public void periodic() {
-    climbLeftMotor.set(RobotContainer.xboxController.getRightTriggerAxis());
-    climbRightMotor.set(RobotContainer.xboxController.getRightTriggerAxis());
+
   }
 }

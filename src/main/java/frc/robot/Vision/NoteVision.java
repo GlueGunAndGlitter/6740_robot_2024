@@ -11,31 +11,21 @@ public class NoteVision {
 
     public static PhotonCamera notesCamera;
 
-    public NoteVision(){
+    public NoteVision() {
         notesCamera = new PhotonCamera("Notes-Limelight");
     }
-
-
-
-
 
     public double getRobotToNoteYaw() {
 
         var result = notesCamera.getLatestResult();
         if (!result.hasTargets())
-        return 0.0;
+            return 0.0;
         else
-        return result.getBestTarget().getYaw();
+            return result.getBestTarget().getYaw();
     }
 
     public boolean seesNote() {
         return notesCamera.getLatestResult().hasTargets();
     }
-
-
-
-
-
-
 
 }
