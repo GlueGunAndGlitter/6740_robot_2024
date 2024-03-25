@@ -49,8 +49,8 @@ public class DriveToStage extends PIDCommand {
         swerve);
     // Use addRequirements() here to declare subsystem dependencies.
     // Configure additional PID options by calling `getController` here.
-    RotateToStage.aprilTagVision = aprilTagVision;
-    RotateToStage.swerve = swerve;
+    DriveToStage.aprilTagVision = aprilTagVision;
+    DriveToStage.swerve = swerve;
   }
 
   // Returns true when the command should end.
@@ -63,11 +63,11 @@ public class DriveToStage extends PIDCommand {
     if (aprilTagVision.seesAprilTags()) {
       if (isRedAlince()) {
 
-        if (aprilTagVision.seesSpecificAprilTag(11) != -1) {
+        if (aprilTagVision.getAprilTag(11) != -1) {
           return 11;
-        } else if (aprilTagVision.seesSpecificAprilTag(12) != -1) {
+        } else if (aprilTagVision.getAprilTag(12) != -1) {
           return 12;
-        } else if (aprilTagVision.seesSpecificAprilTag(13) != -1) {
+        } else if (aprilTagVision.getAprilTag(13) != -1) {
           return 13;
         } else {
           return -1;
@@ -75,11 +75,11 @@ public class DriveToStage extends PIDCommand {
 
       } else {
 
-        if (aprilTagVision.seesSpecificAprilTag(14) != -1) {
+        if (aprilTagVision.getAprilTag(14) != -1) {
           return 14;
-        } else if (aprilTagVision.seesSpecificAprilTag(15) != -1) {
+        } else if (aprilTagVision.getAprilTag(15) != -1) {
           return 15;
-        } else if (aprilTagVision.seesSpecificAprilTag(16) != -1) {
+        } else if (aprilTagVision.getAprilTag(16) != -1) {
           return 16;
         } else {
           return -1;

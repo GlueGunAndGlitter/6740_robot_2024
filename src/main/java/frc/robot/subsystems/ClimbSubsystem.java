@@ -27,7 +27,7 @@ public class ClimbSubsystem extends SubsystemBase {
     climbRightMotor.set(speed);
   }
 
-  public Command setSpeeCommand() {
+  public Command setSpeedCommand() {
     return this.run(() -> setSpeed(RobotContainer.xboxController.getRightTriggerAxis()));
   }
 

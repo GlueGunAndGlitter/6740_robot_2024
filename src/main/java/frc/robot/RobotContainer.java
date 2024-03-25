@@ -144,7 +144,7 @@ public class RobotContainer {
 						() -> -driver.getRawAxis(translationAxis),
 						() -> -driver.getRawAxis(rotationAxis)))
 				.withTimeout(2)
-				.andThen(climb.setSpeeCommand()));
+				.andThen(climb.setSpeedCommand()));
 
 		// Aim Assist Triggers
 		commandXBoxController.leftTrigger().whileTrue(new AimAssist(

@@ -18,10 +18,10 @@ import frc.robot.subsystems.Swerve;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class AmpAssist extends PIDCommand {
+public class AlignWithAmp extends PIDCommand {
   /** Creates a new Test. */
 
-  public AmpAssist(Swerve swerve, DoubleSupplier translationX, DoubleSupplier translationY,
+  public AlignWithAmp(Swerve swerve, DoubleSupplier translationX, DoubleSupplier translationY,
       DoubleSupplier rotationSup) {
     super(
         // The controller that the command will use

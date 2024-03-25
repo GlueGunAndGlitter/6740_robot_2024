@@ -58,11 +58,11 @@ public class RotateToStage extends PIDCommand {
     if (aprilTagVision.seesAprilTags()) {
       if (isRedAlince()) {
 
-        if (aprilTagVision.seesSpecificAprilTag(11) != -1) {
+        if (aprilTagVision.getAprilTag(11) != -1) {
           return 60;
-        } else if (aprilTagVision.seesSpecificAprilTag(12) != -1) {
+        } else if (aprilTagVision.getAprilTag(12) != -1) {
           return -60;
-        } else if (aprilTagVision.seesSpecificAprilTag(13) != -1) {
+        } else if (aprilTagVision.getAprilTag(13) != -1) {
           return 180;
         } else {
           return swerve.getHeading().getDegrees();
@@ -70,11 +70,11 @@ public class RotateToStage extends PIDCommand {
 
       } else {
 
-        if (aprilTagVision.seesSpecificAprilTag(14) != -1) {
+        if (aprilTagVision.getAprilTag(14) != -1) {
           return 180;
-        } else if (aprilTagVision.seesSpecificAprilTag(15) != -1) {
+        } else if (aprilTagVision.getAprilTag(15) != -1) {
           return 60;
-        } else if (aprilTagVision.seesSpecificAprilTag(16) != -1) {
+        } else if (aprilTagVision.getAprilTag(16) != -1) {
           return -60;
         } else {
           return swerve.getHeading().getDegrees();
