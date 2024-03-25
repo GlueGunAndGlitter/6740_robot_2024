@@ -4,7 +4,6 @@
 
 package frc.robot.automations;
 
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -28,7 +27,7 @@ public class AmpAssist extends PIDCommand {
         // The controller that the command will use
         new PIDController(0.008, 0, 0.0008),
         // This should return the measurement
-        () -> RobotContainer.aprilTag_Vision.engelFromSpesificAprilTag(wantedAprilTags()),
+        () -> RobotContainer.aprilTag_Vision.angleFromAprilTag(wantedAprilTag()),
         // This should return the setpoint (can also be a constant)
         () -> 0,
         // This uses the output
@@ -38,7 +37,7 @@ public class AmpAssist extends PIDCommand {
           double rotationVal = -MathUtil.applyDeadband(rotationSup.getAsDouble(), Constants.stickDeadband);
 
           /* Drive */
-          if (RobotContainer.aprilTag_Vision.seeAprilTags()){
+          if (RobotContainer.aprilTag_Vision.seesAprilTags()) {
             swerve.drive(
                 new Translation2d(translationVal, output).times(Constants.Swerve.maxSpeed),
                 rotationVal * Constants.Swerve.maxAngularVelocity,
@@ -56,7 +55,7 @@ public class AmpAssist extends PIDCommand {
         swerve);
   };
 
-  private static int wantedAprilTags() {
+  private static int wantedAprilTag() {
     if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
       return 5;
     } else {

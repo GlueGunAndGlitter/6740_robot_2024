@@ -11,49 +11,51 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.util.COTSTalonFXSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 
 public final class Constants {
     public static final double stickDeadband = 0.1;
 
-    public static class Vision {
+    public static class DrivingConstants {
+        public static final double crossWheelsDelay = 0.2;
+    }
 
-        // Cam mounted facing forward, half a meter forward of center, half a meter up from center.
-        public static final Transform3d kRobotToCam =
-                new Transform3d(new Translation3d(0.5, 0.0, 0.5), new Rotation3d(0, 0, 0));
+    public static final class VisionConstants {
+
+        // Cam mounted facing forward, half a meter forward of center, half a meter up
+        // from center.
+        public static final Transform3d kRobotToCam = new Transform3d(new Translation3d(0.5, 0.0, 0.5),
+                new Rotation3d(0, 0, 0));
 
         // The layout of the AprilTags on the field
-        public static final AprilTagFieldLayout kTagLayout =
-                AprilTagFields.kDefaultField.loadAprilTagLayoutField();
+        public static final AprilTagFieldLayout kTagLayout = AprilTagFields.kDefaultField.loadAprilTagLayoutField();
 
-        // The standard deviations of our vision estimated poses, which affect correction rate
+        // The standard deviations of our vision estimated poses, which affect
+        // correction rate
         // (Fake values. Experiment and determine estimation noise on an actual robot.)
         public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
         public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
     }
-
-
 
     public class ClimbConstants {
 
         public static final int CLIMB_RIGHT_MOTOR_PORT = 61;
         public static final int CLIMB_LEFT_MOTOR_PORT = 60;
 
-        // the ports needs to be change
-
     }
 
-    public class ShooterConstants {
+    public static final class ShooterConstants {
 
         // the ports needs to be change
         public static final int NON_STATIC_MOTOR_PORT = 41;
@@ -65,11 +67,6 @@ public final class Constants {
 
         public static final double SHOOT_TIMEOUT = 1.5;
     }
-
-    // public class ConveyorConstants {
-    // public static final int CONVEYOR_TALON_PORT = 40;
-
-    // }
 
     public static final class TransportationConstants {
 
@@ -207,6 +204,14 @@ public final class Constants {
                     angleMotorID,
                     canCoderID, angleOffset);
         }
+
+        public static SwerveModuleState[] crossStates = {
+                new SwerveModuleState(0, Rotation2d.fromDegrees(45)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(135)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(115)),
+                new SwerveModuleState(0, Rotation2d.fromDegrees(225))
+        };
+
     }
 
     public static final class AutoConstants { // TODO: The below constants are used in the example auto, and must be
@@ -225,5 +230,20 @@ public final class Constants {
                 kMaxSpeedMetersPerSecond,
                 Swerve.robotRadius, // Drive base radius (distance from center to furthest module)
                 new ReplanningConfig());
+    }
+
+    public static final class AimAssistConstants {
+        public static final double aimAssistAngleKP = 0.008;
+        public static final double aimAssistAngleKI = 0;
+        public static final double aimAssistAngleKD = 0.0008;
+
+        public static final double aimAssistForwardDrive = 0.6;
+
+    }
+
+    public static final class AmpAssistConstants {
+        public static final double ampAssistAngleKP = 0.008;
+        public static final double ampAssistAngleKI = 0;
+        public static final double ampAssistAngleKD = 0.0008;
     }
 }

@@ -23,7 +23,8 @@ public class AimAssist extends PIDCommand {
       DoubleSupplier rotationSup) {
     super(
         // The controller that the command will use
-        new PIDController(0.008, 0, 0.0008),
+        new PIDController(Constants.AimAssistConstants.aimAssistAngleKP, Constants.AimAssistConstants.aimAssistAngleKI,
+            Constants.AimAssistConstants.aimAssistAngleKD),
         // This should return the measurement
         () -> RobotContainer.note_vision.getRobotToNoteYaw(),
         // This should return the setpoint (can also be a constant)
@@ -38,7 +39,8 @@ public class AimAssist extends PIDCommand {
           if (RobotContainer.note_vision.seesNote()) {
             if (RobotContainer.xboxController.getYButton()) {
               swerve.drive(
-                  new Translation2d(0.6, -strafeVal).times(Constants.Swerve.maxSpeed),
+                  new Translation2d(Constants.AimAssistConstants.aimAssistForwardDrive, -strafeVal)
+                      .times(Constants.Swerve.maxSpeed),
                   -output * Constants.Swerve.maxAngularVelocity,
                   false,
                   true);

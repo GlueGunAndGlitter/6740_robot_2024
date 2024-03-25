@@ -45,7 +45,7 @@ public class TeleopSwerve extends Command {
             } else {
                 notMovingTimer.start();
 
-                if (notMovingTimer.hasElapsed(0.2)) {
+                if (notMovingTimer.hasElapsed(Constants.DrivingConstants.crossWheelsDelay)) {
                     swerve.crossWheels();
                     return;
                 }
